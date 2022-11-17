@@ -8,17 +8,17 @@ juju_colour="220"
 
 
 run_segment() {
-	tmux_path=$(get_tmux_cwd)
-	cd "$tmux_path"
-	result=""
-	if [ -n "${juju_location=$(__parse_juju)}" ]; then
-		result="$juju_location"
-	fi
-
-	if [ -n "$result" ]; then
-		echo "${result}"
-	fi
-	return 0
+    tmux_path=$(get_tmux_cwd)
+    cd "$tmux_path"
+    result=""
+    if [ -n "${juju_location=$(__parse_juju)}" ]; then
+        result="$juju_location"
+    fi
+    
+    if [ -n "$result" ]; then
+        echo "${result}"
+    fi
+    return 0
 }
 
 
@@ -27,19 +27,12 @@ __parse_juju() {
     local CTRLCFG=~/.local/share/juju/controllers.yaml
     local MODLCFG=~/.local/share/juju/models.yaml
 
-	if [ ! -f $CTRLCFG ]; then
-		return
-	fi
+    if [ -f "$CTRLCFG" -a -f "$MODLCFG" ] ; then
+        jujuctrl=$(grep current-controller "$CTRLCFG" | awk '{ print $2 }')
+        jujumodel=$(yq .controllers."$jujuctrl".current-model < "$MODLCFG")
 
-    if [ -f $CTRLCFG ] ; then
-            jujuctrl=$(grep current-controller $CTRLCFG | awk '{ print $2 }')
+        #jujuinfo="$jujuctrl:$jujumodel"
+        jujuinfo="$jujumodel"
+        echo  -n "#[fg=colour${juju_colour}]${juju_symbol} #[fg=colour${TMUX_POWERLINE_CUR_SEGMENT_FG}]${jujuinfo}"
     fi
-    if [ -f $MODLCFG ] ; then
-            jujumodel=$(yq .controllers.$jujuctrl.current-model < $MODLCFG)
-    fi
-
-    #jujuinfo="$jujuctrl:$jujumodel"
-    jujuinfo="$jujumodel"
-
-	echo  -n "#[fg=colour${juju_colour}]${juju_symbol} #[fg=colour${TMUX_POWERLINE_CUR_SEGMENT_FG}]${jujuinfo}"
 }
