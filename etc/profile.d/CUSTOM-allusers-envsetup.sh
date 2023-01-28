@@ -6,23 +6,19 @@ alias ls='ls --color -F'
 
 export PATH=$HOME/bin:$PATH
 
-# Locale, default was:
-# $ locale
-#LANG=C.UTF-8
-#LANGUAGE=en_US:en
-#LC_CTYPE="C.UTF-8"
-#LC_NUMERIC=de_DE.UTF-8
-#LC_TIME=de_DE.UTF-8
-#LC_COLLATE="C.UTF-8"
-#LC_MONETARY=de_DE.UTF-8
-#LC_MESSAGES="C.UTF-8"
-#LC_PAPER=de_DE.UTF-8
-#LC_NAME=de_DE.UTF-8
-#LC_ADDRESS=de_DE.UTF-8
-#LC_TELEPHONE=de_DE.UTF-8
-#LC_MEASUREMENT=de_DE.UTF-8
-#LC_IDENTIFICATION=de_DE.UTF-8
-#LC_ALL=
-
-export LC_ALL=en_US.UTF-8
-export LANG=en_US.UTF-8
+# As I typically set Region, Numbers, Time, Currency and Measurement to en_SE.UTF-8
+# in KDE, these will become C.UTF-8 in a shell probably since it is not a valid locale.
+#
+# LC_ALL remains unset.
+#
+# From scratch on any system:
+# locale-gen sv_SE.UTF-8
+# locale-gen en_US.UTF-8
+# update-locale LANG=en_US.UTF-8 LANGUAGE=en_US:en
+# locale | egrep ^LC_ | grep -v LC_ALL | sed 's/=.*/=sv_SE.UTF-8/g' >> /etc/default/locale
+#
+# More info: https://help.ubuntu.com/community/Locale
+#
+if [ -f /etc/default/locale ] ; then
+    source /etc/default/locale
+fi
