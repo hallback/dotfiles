@@ -26,13 +26,31 @@ run_segment() {
 __parse_juju() {
     local CTRLCFG=~/.local/share/juju/controllers.yaml
     local MODLCFG=~/.local/share/juju/models.yaml
+    local LASTPARSEFILE=~/.tmux-powerline/lastparse.juju
+    local LASTPARSE=0
 
     if [ -f "$CTRLCFG" -a -f "$MODLCFG" ] ; then
-        jujuctrl=$(grep current-controller "$CTRLCFG" | awk '{ print $2 }')
-        jujumodel=$(yq .controllers."$jujuctrl".current-model < "$MODLCFG")
+        LASTCHANGE=$(ls -tn --time-style=+%s "$CTRLCFG" "$MODLCFG" | head -1 | awk '{ print $6 }')
+        [ -f "$LASTPARSEFILE" ] && LASTPARSE=$(stat -c %Y "$LASTPARSEFILE")
 
-        #jujuinfo="$jujuctrl:$jujumodel"
-        jujuinfo="$jujumodel"
-        echo  -n "#[fg=colour${juju_colour}]${juju_symbol} #[fg=colour${TMUX_POWERLINE_CUR_SEGMENT_FG}]${jujuinfo}"
+        if [ $LASTCHANGE -gt $LASTPARSE ] ; then
+            jujuctrl=$(grep current-controller "$CTRLCFG" | awk '{ print $2 }')
+            # The last cut command removes the username from the model
+            jujumodel=$(yq .controllers."$jujuctrl".current-model < "$MODLCFG" | cut -d/ -f2)
+
+            # Include the controller name in the output (or not)
+            jujuinfo="$jujuctrl:$jujumodel"
+            #jujuinfo="$jujumodel"
+
+            # DEBUG
+            #echo "parsed yaml on $(date +%s) lastchange: $LASTCHANGE lastparse: $LASTPARSE" >> ~/.tmux-powerline/parselog
+
+            echo  -n "#[fg=colour${juju_colour}]${juju_symbol} #[fg=colour${TMUX_POWERLINE_CUR_SEGMENT_FG}]${jujuinfo}" \
+                | tee "$LASTPARSEFILE"
+        else
+            # DEBUG
+            #echo "just read file $(date +%s) lastchange: $LASTCHANGE lastparse: $LASTPARSE" >> ~/.tmux-powerline/parselog
+            cat "$LASTPARSEFILE"
+        fi
     fi
 }
