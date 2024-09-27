@@ -32,3 +32,6 @@ set showcmd             " show (partial) command in status line
 " Disable line wrapping
 set wrap!
 set formatoptions-=t
+
+set list
+:set listchars=eol:⏎,tab:␉·,trail:␠,nbsp:⎵

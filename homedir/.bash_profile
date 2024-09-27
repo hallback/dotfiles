@@ -33,7 +33,10 @@ test -f "$PRIVATEENV" && source "$PRIVATEENV"
 # Run Neofetch if available
 if [ -n "$PS1" -a -x /usr/bin/neofetch ] ; then
     echo
-    neofetch --package_managers off --disable gpu
+    neofetch --disable theme --disable icons --disable packages
+    echo
+    echo
+    echo
     echo
 fi
 
@@ -43,15 +46,14 @@ export EDITOR="$VISUAL"
 # So that commands starting with space doesn't end up in history
 export HISTCONTROL=ignoredups:ignorespace
 
-# Example, user : "ads samaccountname=abc123"
-# Example, group: "ads cn=group456"
-ads () { ldapsearch -H "$LDAPURI" -b "$LDAPDN" -D "$LDAPUSER" -W $@ ; }
+ads () { ldapsearch $LDAPOPTS $@ ; }
+ads2 () { ldapsearch $LDAP2OPTS $@ ; }
 
 # Start and stop primary local Juju controller
 if [ -n "$JUJUCTRL" ] ; then
-    alias jujustart="lxc start $JUJUCTRL"
-    alias jujustop="lxc stop $JUJUCTRL"
-    alias jujulist="lxc list $JUJUCTRL"
+    alias jujustart="lxc start $JUJUCTRL --project default"
+    alias jujustop="lxc stop $JUJUCTRL --project default"
+    alias jujulist="lxc list $JUJUCTRL --project default"
 fi
 
 # ALIASES
@@ -59,3 +61,13 @@ fi
 alias outlook="ncal -s DE -y -M -w -b"
 alias wjs="watch -n 3 -c juju status --color"
 alias oscins="openstack --insecure"
+alias j3="$JUJU3VER"
+alias wjs3="$JUJU3VER status --watch=3s"
+
+function urldecode() {
+    python3 -c "import sys; from urllib.parse import unquote; print(unquote(sys.argv[1]));" $1
+}
+
+function urlencode() {
+    python3 -c "import sys; import urllib.parse; print(urllib.parse.quote(sys.argv[1]))" $1
+}
